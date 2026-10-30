@@ -1,3 +1,109 @@
-<?php require_once 'includes/config.php'; require_admin(); require_once __DIR__.'/includes/profile_uploads.php';
-$msg = null;
-$error = null;$msg='';$error='';if($_SERVER['REQUEST_METHOD']==='POST'){$u=trim($_POST['username']??'');$n=trim($_POST['full_name']??'');$e=trim($_POST['email']??'');$g=trim($_POST['gender']??'');$p=$_POST['password']??'';if(!$u||!$n||strlen($p)<8)$error='Username, full name and a password of at least 8 characters are required.';elseif($e && !filter_var($e,FILTER_VALIDATE_EMAIL))$error='Enter a valid email address.';else{try{$uq=$dbh->prepare('SELECT 1 FROM admin WHERE UserName=:u1 UNION SELECT 1 FROM tblstudents WHERE StudentUsername=:u2 LIMIT 1');$uq->execute([':u1'=>$u,':u2'=>$u]);if($uq->fetchColumn())throw new RuntimeException('Username is already used by another account type. Choose a globally unique username.');$dbh->beginTransaction();$q=$dbh->prepare('INSERT INTO teachers(username,full_name,email,gender,password) VALUES(:u,:n,:e,:g,:p)');$q->execute([':u'=>$u,':n'=>$n,':e'=>$e?:null,':g'=>$g?:null,':p'=>password_hash($p,PASSWORD_DEFAULT)]);srms_store_profile_photo($_FILES['profile_photo']??[], 'teacher', (int)$dbh->lastInsertId(), $dbh);$dbh->commit();audit_log($dbh,'TEACHER_CREATE','Created teacher '.$u);$msg='Teacher created successfully.';}catch(Throwable $x){if($dbh->inTransaction())$dbh->rollBack();error_log('Teacher creation: '.$x->getMessage());$error=$x instanceof RuntimeException?$x->getMessage():($x->getCode()==='23000'?'Username or email already exists.':'Unable to create teacher.');}}}?><!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Add Teacher | SRMS</title><link rel="stylesheet" href="css/bootstrap.min.css"><link rel="stylesheet" href="css/font-awesome.min.css"><link rel="stylesheet" href="css/main.css"><link rel="stylesheet" href="css/srms-modernization.css"><link rel="stylesheet" href="css/srms-responsive.css"></head><body class="top-navbar-fixed"><div class="main-wrapper"><?php include 'includes/topbar.php';?><div class="content-wrapper"><div class="content-container"><?php include 'includes/leftbar.php';?><main class="main-page"><div class="container-fluid srms-page"><div class="srms-toolbar"><a href="manage-teachers.php" class="btn btn-default">← Teachers</a></div><div class="panel"><div class="panel-heading"><h3>Create Teacher</h3></div><div class="panel-body"><?php if($msg):?><div class="alert alert-success"><?php echo e($msg);?></div><?php endif;?><?php if($error):?><div class="alert alert-danger"><?php echo e($error);?></div><?php endif;?><form method="post" enctype="multipart/form-data"><?php echo csrf_field();?><div class="form-group"><label>Username</label><input class="form-control" name="username" maxlength="100" required></div><div class="form-group"><label>Full Name</label><input class="form-control" name="full_name" maxlength="150" required></div><div class="form-group"><label>Email</label><input class="form-control" type="email" name="email" maxlength="150"></div><div class="form-group"><label>Gender</label><select class="form-control" name="gender"><option value="">Select gender</option><option>Male</option><option>Female</option><option>Other</option></select></div><div class="form-group"><label>Teacher Photo (optional, JPG/PNG/WebP, max 3 MB)</label><input class="form-control" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp"></div><div class="form-group"><label>Initial Password</label><input class="form-control" type="password" name="password" minlength="8" required></div><button class="btn btn-success">Create Teacher</button></form></div></div></div></main></div></div></div></div></body></html>
+<?php
+require_once 'includes/config.php';
+require_admin();
+require_once __DIR__.'/includes/profile_uploads.php';
+
+$msg = '';
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
+    $u = trim($_POST['username'] ?? '');
+    $n = trim($_POST['full_name'] ?? '');
+    $e = trim($_POST['email'] ?? '');
+    $g = trim($_POST['gender'] ?? '');
+    $p = $_POST['password'] ?? '';
+
+    if (!$u || !$n || strlen($p) < 8) {
+        $error = 'Username, full name and a password of at least 8 characters are required.';
+    } elseif ($e && !filter_var($e, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Enter a valid email address.';
+    } else {
+        try {
+            $uq = $dbh->prepare('SELECT 1 FROM admin WHERE UserName=:u LIMIT 1');
+            $uq->execute([':u' => $u]);
+            $used = (bool)$uq->fetchColumn();
+
+            if (!$used) {
+                $uq = $dbh->prepare('SELECT 1 FROM teachers WHERE username=:u LIMIT 1');
+                $uq->execute([':u' => $u]);
+                $used = (bool)$uq->fetchColumn();
+            }
+
+            $studentColumns = $dbh->query('SHOW COLUMNS FROM tblstudents')->fetchAll(PDO::FETCH_COLUMN);
+            if (!$used && in_array('StudentUsername', $studentColumns, true)) {
+                $uq = $dbh->prepare('SELECT 1 FROM tblstudents WHERE StudentUsername=:u LIMIT 1');
+                $uq->execute([':u' => $u]);
+                $used = (bool)$uq->fetchColumn();
+            }
+
+            if ($used) {
+                throw new RuntimeException('Username is already used by another account type. Choose a globally unique username.');
+            }
+
+            $dbh->beginTransaction();
+            $q = $dbh->prepare('INSERT INTO teachers(username,full_name,email,gender,password) VALUES(:u,:n,:e,:g,:p)');
+            $q->execute([
+                ':u' => $u,
+                ':n' => $n,
+                ':e' => $e ?: null,
+                ':g' => $g ?: null,
+                ':p' => password_hash($p, PASSWORD_DEFAULT),
+            ]);
+            srms_store_profile_photo($_FILES['profile_photo'] ?? [], 'teacher', (int)$dbh->lastInsertId(), $dbh);
+            $dbh->commit();
+            audit_log($dbh, 'TEACHER_CREATE', 'Created teacher '.$u);
+            $msg = 'Teacher created successfully.';
+        } catch (Throwable $x) {
+            if ($dbh->inTransaction()) {
+                $dbh->rollBack();
+            }
+            error_log('Teacher creation: '.$x->getMessage());
+            $error = $x instanceof RuntimeException
+                ? $x->getMessage()
+                : ($x->getCode() === '23000' ? 'Username or email already exists.' : 'Unable to create teacher.');
+        }
+    }
+}
+?>
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Add Teacher | SRMS</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/srms-modernization.css">
+    <link rel="stylesheet" href="css/srms-responsive.css">
+</head>
+<body class="top-navbar-fixed">
+<div class="main-wrapper">
+<?php include 'includes/topbar.php';?>
+<div class="content-wrapper"><div class="content-container">
+<?php include 'includes/leftbar.php';?>
+<main class="main-page"><div class="container-fluid srms-page">
+    <div class="srms-toolbar"><a href="manage-teachers.php" class="btn btn-default">← Teachers</a></div>
+    <div class="panel">
+        <div class="panel-heading"><h3>Create Teacher</h3></div>
+        <div class="panel-body">
+            <?php if($msg):?><div class="alert alert-success"><?=e($msg)?></div><?php endif;?>
+            <?php if($error):?><div class="alert alert-danger"><?=e($error)?></div><?php endif;?>
+            <form method="post" enctype="multipart/form-data">
+                <?=csrf_field()?>
+                <div class="form-group"><label>Username</label><input class="form-control" name="username" maxlength="100" required></div>
+                <div class="form-group"><label>Full Name</label><input class="form-control" name="full_name" maxlength="150" required></div>
+                <div class="form-group"><label>Email</label><input class="form-control" type="email" name="email" maxlength="150"></div>
+                <div class="form-group"><label>Gender</label><select class="form-control" name="gender"><option value="">Select gender</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+                <div class="form-group"><label>Teacher Photo (optional, JPG/PNG/WebP, max 3 MB)</label><input class="form-control" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp"></div>
+                <div class="form-group"><label>Initial Password</label><input class="form-control" type="password" name="password" minlength="8" required></div>
+                <button class="btn btn-success">Create Teacher</button>
+            </form>
+        </div>
+    </div>
+</div></main>
+</div></div>
+</div>
+</body>
+</html>
