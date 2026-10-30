@@ -1,0 +1,8 @@
+<?php
+require_once 'includes/config.php';
+$noticeid=(int)($_GET['nid']??0);
+$stmt=$dbh->prepare('SELECT id,noticeTitle,noticeDetails,postingDate FROM tblnotice WHERE id=:id AND Published=1 LIMIT 1');
+$stmt->execute([':id'=>$noticeid]);
+$notice=$stmt->fetch(PDO::FETCH_ASSOC);
+if(!$notice){ http_response_code(404); }
+?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?php echo $notice?e($notice['noticeTitle']):'Notice Not Found';?> | SRMS</title><link rel="stylesheet" href="css/bootstrap.min.css"><link rel="stylesheet" href="css/srms-responsive.css"></head><body><div class="container-fluid" style="padding:20px"><div class="text-right" style="margin-bottom:20px"><a class="btn btn-default" href="index.php">← Home</a> <a class="btn btn-primary" href="find-result.php">Student Results</a> <a class="btn btn-success" href="admin-login.php">Admin Login</a> <a class="btn btn-info" href="teacher-login.php">Teacher Login</a></div><?php if($notice):?><div class="panel panel-default"><div class="panel-heading"><h2><?php echo e($notice['noticeTitle']);?></h2></div><div class="panel-body"><p class="text-muted"><strong>Posted:</strong> <?php echo e($notice['postingDate']);?></p><hr><div style="white-space:pre-wrap;line-height:1.7"><?php echo e($notice['noticeDetails']);?></div></div></div><?php else:?><div class="alert alert-warning"><strong>Notice not found.</strong> This notice may have been removed or is no longer published.</div><?php endif;?></div><script src="js/jquery/jquery-2.2.4.min.js"></script><script src="js/bootstrap/bootstrap.min.js"></script></body></html>

@@ -1,0 +1,10 @@
+Options -Indexes
+AddType application/manifest+json .webmanifest
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(?:storage|backups|uploads|tests|deploy|migrations|scripts)/(.*)$ - [F,L]
+  RewriteRule (^|/)\.(.*)$ - [F,L]
+  RewriteRule \.(?:sql|md|ini|log|env)$ - [F,L,NC]
+  RewriteRule ^(?:composer\.json|composer\.lock|package(-lock)?\.json|gulpfile\..*|includes/config\.local\.php|config\.local\.php)$ - [F,L,NC]
+</IfModule>

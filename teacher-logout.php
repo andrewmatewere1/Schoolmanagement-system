@@ -1,0 +1,1 @@
+<?php require_once 'includes/config.php'; if(!empty($_SESSION['teacher_login'])) audit_log($dbh,'TEACHER_LOGOUT','Teacher logout'); unset($_SESSION['teacher_login'],$_SESSION['teacher_id'],$_SESSION['teacher_username'],$_SESSION['teacher_name']); session_regenerate_id(true); header('Location: teacher-login.php'); exit;

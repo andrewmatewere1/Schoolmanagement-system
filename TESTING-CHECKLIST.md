@@ -1,0 +1,27 @@
+# SRMS V3 End-to-End Testing Checklist
+
+- [ ] Apache running
+- [ ] MySQL/MariaDB running
+- [ ] `/srms/` opens
+- [ ] `/admin-login.php` opens
+- [ ] Admin login works and MD5 migration occurs
+- [ ] Dashboard works
+- [ ] Class create/edit/delete
+- [ ] Subject create/edit/delete
+- [ ] Subject combination add/activate/deactivate
+- [ ] Student create/edit/status
+- [ ] Result add with academic year/term/exam
+- [ ] Invalid marks rejected
+- [ ] Duplicate result updates rather than duplicates
+- [ ] Result edit works
+- [ ] Published result visible publicly
+- [ ] Unpublished result is hidden
+- [ ] Public result search works
+- [ ] Grade/percentage calculation works
+- [ ] Print result works
+- [ ] Notice add/delete works
+- [ ] Password change works
+- [ ] Logout works
+- [ ] Authenticated POST without CSRF token returns 403
+- [ ] SQL injection payloads are treated as input, not SQL
+- [ ] HTML output is escaped

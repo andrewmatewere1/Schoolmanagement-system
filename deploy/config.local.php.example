@@ -1,0 +1,15 @@
+<?php
+// Copy to includes/config.local.php for InfinityFree.
+// Replace every placeholder before uploading.
+define('DB_HOST','sqlXXX.infinityfree.com');
+define('DB_PORT',3306);
+define('DB_NAME','if0_XXXXXXXX_srms');
+define('DB_USER','if0_XXXXXXXX');
+define('DB_PASS','REPLACE_WITH_INFINITYFREE_MYSQL_PASSWORD');
+define('APP_TIMEZONE','Africa/Blantyre');
+// Configure a real SMTP transport in production; SRMS_MAIL_FROM is used by the PHP mail transport.
+define('SRMS_MAIL_FROM','results@example.edu');
+// Meta WhatsApp Cloud API credentials. Keep tokens private and rotate them regularly.
+define('WHATSAPP_ACCESS_TOKEN','REPLACE_WITH_META_PERMANENT_OR_SYSTEM_USER_TOKEN');
+define('WHATSAPP_PHONE_NUMBER_ID','REPLACE_WITH_PHONE_NUMBER_ID');
+define('WHATSAPP_GRAPH_VERSION','v21.0');

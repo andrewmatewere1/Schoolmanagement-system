@@ -1,0 +1,15 @@
+{
+  "name": "SRMS School Management",
+  "short_name": "SRMS",
+  "description": "School records and guardian portal",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#17365d",
+  "icons": [
+    {"src":"apple-touch-icon.png","sizes":"180x180","type":"image/png","purpose":"any"},
+    {"src":"apple-touch-icon.png","sizes":"180x180","type":"image/png","purpose":"maskable"}
+  ]
+}

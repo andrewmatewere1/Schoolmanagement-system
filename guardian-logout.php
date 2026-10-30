@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/includes/config.php';unset($_SESSION['guardian_login'],$_SESSION['guardian_id'],$_SESSION['guardian_email']);session_regenerate_id(true);header('Location: guardian-login.php');exit;

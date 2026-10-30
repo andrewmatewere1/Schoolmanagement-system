@@ -1,0 +1,22 @@
+# Local and production configuration
+includes/config.local.php
+*.env
+
+# Database backups and SQL dumps
+*.sql
+!migrations/*.sql
+storage/backups/*
+
+# Runtime and private upload data
+storage/
+uploads/
+*.log
+*.bak
+
+# Temporary and OS files
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+php_errorlog
+

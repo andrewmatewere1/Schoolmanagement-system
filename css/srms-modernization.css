@@ -1,0 +1,10 @@
+/* Phase 5: shared responsive refinements; legacy Bootstrap layouts remain supported. */
+:root{--srms-ink:#1f2937;--srms-muted:#64748b;--srms-border:#e5e7eb;--srms-surface:#fff;--srms-accent:#2457a7}
+html{scroll-behavior:smooth}body{color:var(--srms-ink)}
+.panel,.dashboard-stat{border-radius:9px;overflow:hidden}.panel{border:1px solid var(--srms-border);box-shadow:0 2px 9px rgba(15,23,42,.045)}
+.panel-heading{font-weight:600}.btn{border-radius:5px;transition:filter .15s ease}.btn:hover{filter:brightness(.96)}
+.form-control{min-height:38px;border-radius:5px;box-shadow:none}.form-control:focus{border-color:#78a5e8;box-shadow:0 0 0 3px rgba(36,87,167,.12)}
+.table>thead>tr>th{background:#f5f7fb;white-space:nowrap}.table td{vertical-align:middle}.table-responsive{-webkit-overflow-scrolling:touch}
+.page-title-div .title{font-weight:650;letter-spacing:-.02em}.breadcrumb{background:transparent;padding-left:0}
+@media(max-width:767px){.main-page{min-width:0}.container-fluid{padding-left:12px;padding-right:12px}.page-title-div h2{font-size:22px}.panel-body{padding:12px}.btn{margin-bottom:4px}.table-responsive table{min-width:680px}.form-group{margin-bottom:14px}.dashboard-stat{margin-bottom:12px}.content-wrapper,.content-container,.main-page{max-width:100%;overflow-x:hidden}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
