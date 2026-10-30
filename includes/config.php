@@ -23,11 +23,11 @@ if ($isHttps) { header('Strict-Transport-Security: max-age=31536000; includeSubD
 $localConfig = __DIR__ . '/config.local.php';
 if (is_file($localConfig)) require_once $localConfig;
 
-define('DB_HOST', defined('DB_HOST') ? DB_HOST : 'localhost');
-define('DB_USER', defined('DB_USER') ? DB_USER : 'root');
-define('DB_PASS', defined('DB_PASS') ? DB_PASS : '');
-define('DB_NAME', defined('DB_NAME') ? DB_NAME : 'srms');
-define('DB_PORT', defined('DB_PORT') ? DB_PORT : 3306);
+if (!defined('DB_HOST')) define('DB_HOST', 'localhost');
+if (!defined('DB_USER')) define('DB_USER', 'root');
+if (!defined('DB_PASS')) define('DB_PASS', '');
+if (!defined('DB_NAME')) define('DB_NAME', 'srms');
+if (!defined('DB_PORT')) define('DB_PORT', 3306);
 define('APP_NAME', 'Student Result Management System');
 date_default_timezone_set(defined('APP_TIMEZONE') ? APP_TIMEZONE : 'Asia/Kolkata');
 require_once __DIR__ . '/security.php';
