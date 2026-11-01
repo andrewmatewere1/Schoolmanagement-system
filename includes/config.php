@@ -41,8 +41,17 @@ try {
 } catch (PDOException $e) {
     error_log('SRMS database error: '.$e->getMessage());
     http_response_code(500);
-    $safeDetail = preg_replace('/[^a-zA-Z0-9 _\-:.]/', '', $e->getMessage());
-    exit('Database connection failed: '.e($safeDetail).'<br>Check includes/config.local.php: database host, name, username, and password must match InfinityFree MySQL control panel values.');
+    $pdoCode = (int)($e->errorInfo[1] ?? 0);
+    if ($pdoCode === 1044) {
+        $detail = 'The MySQL user cannot access the configured database.';
+    } elseif ($pdoCode === 1045) {
+        $detail = 'The database username or password is incorrect.';
+    } elseif ($pdoCode === 2002) {
+        $detail = 'The database hostname could not be reached.';
+    } else {
+        $detail = 'The database connection was rejected.';
+    }
+    exit('Database connection failed: '.e($detail).'<br>Check includes/config.local.php so host, database name, username, and password exactly match the InfinityFree MySQL control panel.');
 }
 function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
 function csrf_token(): string { if(empty($_SESSION['csrf_token'])) $_SESSION['csrf_token']=bin2hex(random_bytes(32)); return $_SESSION['csrf_token']; }
